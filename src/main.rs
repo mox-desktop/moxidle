@@ -69,7 +69,7 @@ impl Inhibitors {
     }
 }
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 enum LockState {
     Locked,
     Unlocked,
@@ -360,6 +360,7 @@ impl Moxidle {
     }
 }
 
+#[derive(Debug)]
 enum Event {
     GetActiveTime(oneshot::Sender<u32>),
     GetLockState(oneshot::Sender<LockState>),
@@ -587,24 +588,24 @@ async fn main() -> anyhow::Result<()> {
         })?;
     }
 
-    if let Some(usb_context) = moxidle.usb_context.as_ref() {
-        let event_sender = event_sender.clone();
-        usb::serve(event_sender, usb_context.clone())?;
+    //if let Some(usb_context) = moxidle.usb_context.as_ref() {
+    //    let event_sender = event_sender.clone();
+    //    usb::serve(event_sender, usb_context.clone())?;
 
-        let usb_context = usb_context.clone();
-        event_loop
-            .handle()
-            .insert_source(calloop::timer::Timer::immediate(), move |_, _, _| {
-                if let Err(e) = usb_context.handle_events(None) {
-                    log::error!("USB event handling error: {e}");
-                }
+    //    let usb_context = usb_context.clone();
+    //    event_loop
+    //        .handle()
+    //        .insert_source(calloop::timer::Timer::immediate(), move |_, _, _| {
+    //            if let Err(e) = usb_context.handle_events(None) {
+    //                log::error!("USB event handling error: {e}");
+    //            }
 
-                calloop::timer::TimeoutAction::ToInstant(
-                    std::time::Instant::now() + std::time::Duration::from_millis(100),
-                )
-            })
-            .map_err(|e| anyhow::anyhow!("Failed to insert USB event source: {e}"))?;
-    }
+    //            calloop::timer::TimeoutAction::ToInstant(
+    //                std::time::Instant::now() + std::time::Duration::from_millis(100),
+    //            )
+    //        })
+    //        .map_err(|e| anyhow::anyhow!("Failed to insert USB event source: {e}"))?;
+    //}
 
     event_loop
         .handle()
