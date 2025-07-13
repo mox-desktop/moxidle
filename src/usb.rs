@@ -50,12 +50,12 @@ fn get_class_name(interfaces: Interfaces) -> String {
     class_name
 }
 
-pub fn serve(
+pub async fn serve(
     event_sender: channel::Sender<Event>,
     usb_context: rusb::Context,
 ) -> anyhow::Result<()> {
     let registration = rusb::HotplugBuilder::new().enumerate(true).register(
-        usb_context,
+        usb_context.clone(),
         Box::new(HotPlugHandler(Box::new(move |_| {
             if let Err(e) = event_sender.send(Event::Usb) {
                 log::error!("{e}");
@@ -63,7 +63,17 @@ pub fn serve(
         }))),
     );
 
-    Box::leak(Box::new(registration));
+    tokio::spawn(async move {
+        // Prevent registration from being dropped
+        #[allow(unused_variables)]
+        let registration = registration;
+
+        loop {
+            if let Err(e) = usb_context.handle_events(None) {
+                log::error!("{e}");
+            }
+        }
+    });
 
     Ok(())
 }
