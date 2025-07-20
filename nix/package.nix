@@ -12,7 +12,7 @@ let
 in
 rustPlatform.buildRustPackage {
   pname = "moxidle";
-  version = "${cargoToml.package.version}";
+  inherit (cargoToml.package) version;
   cargoLock.lockFile = ../Cargo.lock;
 
   src = lib.cleanSourceWith {
@@ -62,7 +62,7 @@ rustPlatform.buildRustPackage {
   meta = with lib; {
     description = "Idle daemon with conditional listeners and built-in audio inhibitor";
     mainProgram = "moxidle";
-    homepage = "https://github.com/unixpariah/moxidle";
+    homepage = "https://github.com/mox-desktop/moxidle";
     license = licenses.mit;
     maintainers = with maintainers; [ unixpariah ];
     platforms = platforms.unix;

@@ -203,7 +203,16 @@ impl Moxidle {
                 self.power.update_percentage(battery);
                 self.reset_idle_timers();
             }
-            Event::SimulateUserActivity | Event::Usb => {
+            Event::SimulateUserActivity => self.listeners.iter_mut().for_each(|listener| {
+                if let Some(notification) = listener.notification.take() {
+                    if let Some(on_resume) = listener.on_resume() {
+                        log::info!("Executing resume command: {on_resume}");
+                        execute_command(Arc::clone(on_resume));
+                    }
+                    notification.destroy();
+                }
+            }),
+            Event::Usb => {
                 self.reset_idle_timers();
             }
             Event::ScreenSaverInhibit(inhibited) => {
@@ -232,8 +241,7 @@ impl Moxidle {
                 };
 
                 if let Some(cmd) = cmd {
-                    let cmd = cmd.clone();
-                    execute_command(cmd);
+                    execute_command(Arc::clone(cmd));
                 }
 
                 if locked {
@@ -254,8 +262,7 @@ impl Moxidle {
             }
             Event::ScreenSaverLock => {
                 if let Some(lock_cmd) = self.lock_cmd.as_ref() {
-                    let lock_cmd = lock_cmd.clone();
-                    execute_command(lock_cmd);
+                    execute_command(Arc::clone(lock_cmd));
                     self.state.set_lock_state(LockState::Locked);
                     if self.state.notification.is_none() {
                         self.state.notification =
@@ -274,8 +281,7 @@ impl Moxidle {
                 };
 
                 if let Some(cmd) = cmd {
-                    let cmd = cmd.clone();
-                    execute_command(cmd);
+                    execute_command(Arc::clone(cmd));
                 }
             }
         }
