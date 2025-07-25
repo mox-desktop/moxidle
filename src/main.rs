@@ -99,8 +99,9 @@ impl State {
                 log::error!("Failed to send emit event: {e}");
             }
             self.lock_state = lock_state;
-            if self.lock_state == LockState::Locked {
-                self.active_since = Some(Instant::now());
+            self.active_since = match self.lock_state {
+                LockState::Locked => Some(Instant::now()),
+                LockState::Unlocked => None,
             }
         }
     }

@@ -34,7 +34,7 @@ impl ScreenSaver {
 
     async fn lock(&self) {
         if let Err(e) = self.event_sender.send(Event::ScreenSaverLock) {
-            log::error!("Failed to send SessionLocked(true) event: {e}");
+            log::error!("Failed to send SessionLocked event: {e}");
         }
     }
 
@@ -47,7 +47,7 @@ impl ScreenSaver {
     async fn get_active(&self) -> bool {
         let (response_tx, response_rx) = oneshot::channel();
         if let Err(e) = self.event_sender.send(Event::GetLockState(response_tx)) {
-            log::error!("Failed to send GetActiveTime request: {e}");
+            log::error!("Failed to send GetLockState request: {e}");
             return false;
         }
         response_rx.await.unwrap_or(LockState::Unlocked) == LockState::Locked
