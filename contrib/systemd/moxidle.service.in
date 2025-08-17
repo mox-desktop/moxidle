@@ -8,6 +8,6 @@ After=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
 
 [Service]
-ExecStart=@bindir@/moxidle
+ExecStart=@bindir@/moxidled
 Restart=always
 RestartSec=10

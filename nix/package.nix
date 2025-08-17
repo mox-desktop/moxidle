@@ -12,7 +12,7 @@ let
 in
 rustPlatform.buildRustPackage {
   pname = "moxidle";
-  inherit (cargoToml.package) version;
+  inherit (cargoToml.workspace.package) version;
   cargoLock.lockFile = ../Cargo.lock;
 
   src = lib.cleanSourceWith {
@@ -23,12 +23,11 @@ rustPlatform.buildRustPackage {
         relPath = lib.removePrefix (toString ../. + "/") (toString path);
       in
       lib.any (p: lib.hasPrefix p relPath) [
-        "src"
+        "daemon"
+        "ctl"
+        "contrib"
         "Cargo.toml"
         "Cargo.lock"
-        "doc"
-        "contrib"
-        "completions"
       ];
   };
 
@@ -43,22 +42,24 @@ rustPlatform.buildRustPackage {
     installShellFiles
   ];
 
-  postInstall = ''
-    for f in doc/*.scd; do
-      local page="doc/$(basename "$f" .scd)"
-      scdoc < "$f" > "$page"
-      installManPage "$page"
-    done
+  buildPhase = ''
+    cargo build --release --workspace
+  '';
 
-    installShellCompletion --cmd moxidle \
-      --bash completions/moxidle.bash \
-      --fish completions/moxidle.fish \
-      --zsh completions/_moxidle
+  installPhase = ''
+    install -Dm755 target/release/daemon $out/bin/moxidled
+    install -Dm755 target/release/ctl $out/bin/moxidlectl
+  '';
+
+  postFixup = ''
+    mkdir -p $out/share/systemd/user
+    substitute $src/contrib/systemd/moxidle.service.in $out/share/systemd/user/moxidle.service --replace-fail '@bindir@' "$out/bin"
+    chmod 0644 $out/share/systemd/user/moxidle.service
   '';
 
   meta = {
     description = "Idle daemon with conditional listeners and built-in audio inhibitor";
-    mainProgram = "moxidle";
+    mainProgram = "moxidled";
     homepage = "https://github.com/mox-desktop/moxidle";
     license = lib.licenses.mit;
     maintainers = builtins.attrValues { inherit (lib.maintainers) unixpariah; };
