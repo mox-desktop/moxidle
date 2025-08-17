@@ -45,21 +45,21 @@ impl ScreenSaver {
     }
 
     async fn get_active(&self) -> bool {
-        let (response_tx, response_rx) = oneshot::channel();
-        if let Err(e) = self.event_sender.send(Event::GetLockState(response_tx)) {
+        let (tx, rx) = oneshot::channel();
+        if let Err(e) = self.event_sender.send(Event::GetLockState(tx)) {
             log::error!("Failed to send GetLockState request: {e}");
             return false;
         }
-        response_rx.await.unwrap_or(LockState::Unlocked) == LockState::Locked
+        rx.await.unwrap_or(LockState::Unlocked) == LockState::Locked
     }
 
     async fn get_active_time(&self) -> u32 {
-        let (response_tx, response_rx) = oneshot::channel();
-        if let Err(e) = self.event_sender.send(Event::GetActiveTime(response_tx)) {
+        let (tx, rx) = oneshot::channel();
+        if let Err(e) = self.event_sender.send(Event::GetActiveTime(tx)) {
             log::error!("Failed to send GetActiveTime request: {e}");
             return 0;
         }
-        response_rx.await.unwrap_or(0)
+        rx.await.unwrap_or(0)
     }
 
     async fn get_session_idle_time(&self) -> zbus::fdo::Result<u32> {

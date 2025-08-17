@@ -2,6 +2,7 @@
 mod audio;
 mod config;
 mod login;
+mod moxidle;
 mod screensaver;
 mod upower;
 mod usb;
@@ -56,11 +57,12 @@ struct Inhibitors {
     audio_inhibitor: bool,
     dbus_inhibitor: bool,
     systemd_inhibitor: bool,
+    ctl_inhibitor: bool,
 }
 
 impl Inhibitors {
     fn active(&self) -> bool {
-        let mut active = self.dbus_inhibitor || self.systemd_inhibitor;
+        let mut active = self.dbus_inhibitor || self.systemd_inhibitor || self.ctl_inhibitor;
         #[cfg(feature = "audio")]
         {
             active |= self.audio_inhibitor;
@@ -73,6 +75,12 @@ impl Inhibitors {
 enum LockState {
     Locked,
     Unlocked,
+}
+
+#[derive(PartialEq, Copy, Clone, Debug)]
+enum InhibitState {
+    Inhibited,
+    Uninhibited,
 }
 
 struct State {
@@ -229,6 +237,17 @@ impl Moxidle {
                     self.reset_idle_timers();
                 }
             }
+            Event::CtlInhibited(inhibited) => {
+                self.inhibitors.ctl_inhibitor = inhibited;
+                self.reset_idle_timers();
+            }
+            Event::GetCtlInhibitState(sender) => {
+                sender.send(if self.inhibitors.ctl_inhibitor {
+                    InhibitState::Inhibited
+                } else {
+                    InhibitState::Uninhibited
+                });
+            }
             #[cfg(feature = "audio")]
             Event::AudioInhibit(inhibited) => {
                 self.inhibitors.audio_inhibitor = inhibited;
@@ -368,7 +387,7 @@ impl Moxidle {
 }
 
 #[derive(Debug)]
-enum Event {
+pub enum Event {
     GetActiveTime(oneshot::Sender<u32>),
     GetLockState(oneshot::Sender<LockState>),
     BatteryState(BatteryState),
@@ -380,6 +399,8 @@ enum Event {
     SessionLocked(bool),
     ScreenSaverLock,
     BlockInhibited(bool),
+    CtlInhibited(bool),
+    GetCtlInhibitState(oneshot::Sender<InhibitState>),
     PrepareForSleep(bool),
     Usb,
     #[cfg(feature = "audio")]
@@ -579,6 +600,15 @@ async fn main() -> anyhow::Result<()> {
         let dbus_conn = Arc::clone(&dbus_conn);
         scheduler.schedule(async move {
             if let Err(e) = login::serve(dbus_conn, event_sender, ignore_systemd_inhibit).await {
+                log::error!("D-Bus login manager error: {e}");
+            }
+        })?;
+    }
+
+    {
+        let event_sender = event_sender.clone();
+        scheduler.schedule(async move {
+            if let Err(e) = moxidle::serve(event_sender).await {
                 log::error!("D-Bus login manager error: {e}");
             }
         })?;
