@@ -54,17 +54,14 @@ rustPlatform.buildRustPackage {
       --bash completions/moxidle.bash \
       --fish completions/moxidle.fish \
       --zsh completions/_moxidle
-
-    # This is for integration with moxctl
-    ln -s $out/bin/moxidle $out/bin/moxidlectl
   '';
 
-  meta = with lib; {
+  meta = {
     description = "Idle daemon with conditional listeners and built-in audio inhibitor";
     mainProgram = "moxidle";
     homepage = "https://github.com/mox-desktop/moxidle";
-    license = licenses.mit;
-    maintainers = with maintainers; [ unixpariah ];
-    platforms = platforms.unix;
+    license = lib.licenses.mit;
+    maintainers = builtins.attrValues { inherit (lib.maintainers) unixpariah; };
+    platforms = lib.platforms.unix;
   };
 }
