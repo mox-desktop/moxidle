@@ -72,13 +72,13 @@ impl Inhibitors {
 }
 
 #[derive(PartialEq, Copy, Clone, Debug)]
-enum LockState {
+pub enum LockState {
     Locked,
     Unlocked,
 }
 
 #[derive(PartialEq, Copy, Clone, Debug)]
-enum InhibitState {
+pub enum InhibitState {
     Inhibited,
     Uninhibited,
 }
@@ -242,7 +242,7 @@ impl Moxidle {
                 self.reset_idle_timers();
             }
             Event::GetCtlInhibitState(sender) => {
-                sender.send(if self.inhibitors.ctl_inhibitor {
+                _ = sender.send(if self.inhibitors.ctl_inhibitor {
                     InhibitState::Inhibited
                 } else {
                     InhibitState::Uninhibited

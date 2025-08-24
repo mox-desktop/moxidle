@@ -1,8 +1,8 @@
-use crate::{Event, InhibitState, LockState};
+use crate::{Event, InhibitState};
 use futures_lite::stream::StreamExt;
-use tokio::sync::{broadcast, mpsc, oneshot};
+use tokio::sync::oneshot;
 use zbus::fdo::DBusProxy;
-use zbus::{fdo::RequestNameFlags, object_server::SignalEmitter};
+use zbus::fdo::RequestNameFlags;
 
 struct MoxidleInterface {
     event_sender: calloop::channel::Sender<Event>,
@@ -13,7 +13,9 @@ struct MoxidleInterface {
 impl MoxidleInterface {
     async fn inhibited(&self) -> bool {
         let (tx, rx) = oneshot::channel();
-        self.event_sender.send(Event::GetCtlInhibitState(tx));
+        if let Err(e) = self.event_sender.send(Event::GetCtlInhibitState(tx)) {
+            log::warn!("{e}");
+        }
 
         rx.await.unwrap_or(InhibitState::Uninhibited) == InhibitState::Inhibited
     }
@@ -35,14 +37,8 @@ impl MoxidleInterface {
     }
 }
 
-pub async fn serve(
-    event_sender: calloop::channel::Sender<Event>,
-    //mut emit_receiver: broadcast::Receiver<EmitEvent>,
-) -> zbus::Result<()> {
-    let server = MoxidleInterface {
-        event_sender,
-        //emit_receiver: emit_receiver.resubscribe(),
-    };
+pub async fn serve(event_sender: calloop::channel::Sender<Event>) -> zbus::Result<()> {
+    let server = MoxidleInterface { event_sender };
 
     let conn = zbus::connection::Builder::session()?
         .serve_at("/pl/mox/Idle", server)?

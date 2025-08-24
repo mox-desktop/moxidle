@@ -29,7 +29,7 @@ pub enum IdleCommand {
 }
 
 #[derive(Subcommand)]
-enum SwitchAction {
+pub enum SwitchAction {
     On,
     Off,
     Toggle,
