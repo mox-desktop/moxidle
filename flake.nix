@@ -77,7 +77,8 @@
       });
 
       homeManagerModules = {
-        default = import ./nix/home-manager.nix;
+        moxidle = import ./nix/home-manager.nix;
+        default = self.homeManagerModules.moxidle;
       };
     };
 }

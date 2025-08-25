@@ -26,6 +26,7 @@ serde_repr = "0.1.19"
 rusb = "0.9.4"
 anyhow = { version = "1.0.98", default-features = false }
 zbus = { version = "5.9.0", features = ["async-io"], default-features = false }
+tvix_serde = { git = "https://code.tvl.fyi/depot.git", rev = "a4935331b134eabe169495c73f3a0b60411b59e3", package = "tvix-serde" }
 
 [features]
 default = [ "audio" ]
