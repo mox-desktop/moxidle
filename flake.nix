@@ -8,7 +8,12 @@
   };
 
   outputs =
-    { nixpkgs, rust-overlay, ... }:
+    {
+      self,
+      nixpkgs,
+      rust-overlay,
+      ...
+    }:
     let
       systems = [
         "x86_64-linux"
@@ -58,7 +63,7 @@
       });
 
       packages = forAllSystems (pkgs: {
-        default = pkgs.callPackage ./nix/package.nix {
+        moxidle = pkgs.callPackage ./nix/package.nix {
           rustPlatform =
             let
               rust-bin = pkgs.rust-bin.stable.latest.default;
@@ -68,6 +73,7 @@
               rustc = rust-bin;
             };
         };
+        default = self.packages.${pkgs.system}.moxidle;
       });
 
       homeManagerModules = {
