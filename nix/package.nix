@@ -55,12 +55,6 @@ rustPlatform.buildRustPackage {
     install -Dm755 target/release/ctl $out/bin/moxidlectl
   '';
 
-  postFixup = ''
-    mkdir -p $out/share/systemd/user
-    substitute $src/contrib/systemd/moxidle.service.in $out/share/systemd/user/moxidle.service --replace-fail '@bindir@' "$out/bin"
-    chmod 0644 $out/share/systemd/user/moxidle.service
-  '';
-
   meta = {
     description = "Idle daemon with conditional listeners and built-in audio inhibitor";
     mainProgram = "moxidled";

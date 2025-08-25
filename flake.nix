@@ -58,8 +58,32 @@
             export LD_LIBRARY_PATH=${pkgs.libpulseaudio}/lib:$LD_LIBRARY_PATH
           '';
         };
-
       });
+
+      formatter = forAllSystems (
+        pkgs:
+        pkgs.writeShellApplication {
+          name = "nix3-fmt-wrapper";
+
+          runtimeInputs = [
+            pkgs.nixfmt-rfc-style
+            pkgs.taplo
+            pkgs.fd
+            (pkgs.rust-bin.selectLatestNightlyWith (
+              toolchain:
+              toolchain.default.override {
+                extensions = [ "rustfmt" ];
+              }
+            ))
+          ];
+
+          text = ''
+            fd "$@" -t f -e nix -x nixfmt -q '{}'
+            fd "$@" -t f -e toml -x taplo format '{}'
+            cargo fmt
+          '';
+        }
+      );
 
       packages = forAllSystems (pkgs: {
         moxidle = pkgs.callPackage ./nix/package.nix {

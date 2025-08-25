@@ -6,7 +6,6 @@ use zbus::fdo::RequestNameFlags;
 
 struct MoxidleInterface {
     event_sender: calloop::channel::Sender<Event>,
-    //emit_receiver: broadcast::Receiver<EmitEvent>,
 }
 
 #[zbus::interface(name = "pl.mox.Idle")]
@@ -28,12 +27,15 @@ impl MoxidleInterface {
         if let Err(e) = self.event_sender.send(Event::CtlInhibited(true)) {
             log::warn!("{e}");
         }
+
+        log::info!("inhibit");
     }
 
     async fn uninhibit(&self) {
         if let Err(e) = self.event_sender.send(Event::CtlInhibited(false)) {
             log::warn!("{e}");
         }
+        log::info!("uninhibit");
     }
 }
 
