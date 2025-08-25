@@ -1,6 +1,5 @@
 {
   pkg-config,
-  lua5_4,
   libpulseaudio,
   lib,
   rustPlatform,
@@ -13,7 +12,13 @@ in
 rustPlatform.buildRustPackage {
   pname = "moxidle";
   inherit (cargoToml.workspace.package) version;
-  cargoLock.lockFile = ../Cargo.lock;
+
+  cargoLock = {
+    lockFile = ../Cargo.lock;
+    outputHashes = {
+      "tvix-eval-0.1.0" = "sha256-2uNjqycyGa07RYDYfo7i6rk6zgC1pCfaAgoMTEoF6q0=";
+    };
+  };
 
   src = lib.cleanSourceWith {
     src = ../.;
@@ -37,7 +42,6 @@ rustPlatform.buildRustPackage {
   ];
 
   buildInputs = [
-    lua5_4
     libpulseaudio
     installShellFiles
   ];

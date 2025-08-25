@@ -1,65 +1,34 @@
 use crate::Event;
 use calloop::channel;
 use futures_lite::StreamExt;
-use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::{fmt::Display, sync::Arc};
+use serde::Deserialize;
+use std::sync::Arc;
 use zbus::{proxy, zvariant::OwnedValue};
 
-#[derive(PartialEq, OwnedValue, Deserialize_repr, Serialize_repr, Default, Debug)]
-#[repr(u32)]
+#[derive(PartialEq, OwnedValue, Deserialize, Default, Debug)]
+#[serde(rename_all = "snake_case")]
 pub enum BatteryState {
     #[default]
-    Unknown = 0,
-    Charging = 1,
-    Discharging = 2,
-    Empty = 3,
-    FullyCharged = 4,
-    PendingCharge = 5,
-    PendingDischarge = 6,
+    Unknown,
+    Charging,
+    Discharging,
+    Empty,
+    FullyCharged,
+    PendingCharge,
+    PendingDischarge,
 }
 
-impl Display for BatteryState {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            BatteryState::Unknown => "unknown",
-            BatteryState::Charging => "charging",
-            BatteryState::Discharging => "discharging",
-            BatteryState::Empty => "empty",
-            BatteryState::FullyCharged => "fullycharged",
-            BatteryState::PendingCharge => "pendingcharge",
-            BatteryState::PendingDischarge => "pendingdischarge",
-        };
-        write!(f, "{s}")
-    }
-}
-
-#[derive(PartialEq, OwnedValue, Deserialize_repr, Serialize_repr, Default, Debug)]
-#[repr(u32)]
+#[derive(PartialEq, OwnedValue, Deserialize, Default, Debug)]
+#[serde(rename_all = "snake_case")]
 pub enum BatteryLevel {
     #[default]
-    Unknown = 0,
-    None = 1,
-    Low = 3,
-    Critical = 4,
-    Normal = 6,
-    High = 7,
-    Full = 8,
-}
-
-impl Display for BatteryLevel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            BatteryLevel::Unknown => "unknown",
-            BatteryLevel::None => "none",
-            BatteryLevel::Low => "low",
-            BatteryLevel::Critical => "critical",
-            BatteryLevel::Normal => "normal",
-            BatteryLevel::High => "high",
-            BatteryLevel::Full => "full",
-        };
-
-        write!(f, "{s}")
-    }
+    Unknown,
+    None,
+    Low,
+    Critical,
+    Normal,
+    High,
+    Full,
 }
 
 #[derive(Default, PartialEq)]

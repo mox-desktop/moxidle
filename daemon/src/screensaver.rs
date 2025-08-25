@@ -119,25 +119,6 @@ impl ScreenSaver {
             );
         }
     }
-
-    async fn throttle(
-        &mut self,
-        application_name: &str,
-        reason_for_inhibit: &str,
-        #[zbus(header)] header: zbus::message::Header<'_>,
-    ) -> u32 {
-        // TODO: If anyone tells me what it's supposed to do I'd be happy to implement
-        _ = header;
-        _ = application_name;
-        _ = reason_for_inhibit;
-
-        0
-    }
-
-    async fn un_throttle(&mut self, cookie: u32) {
-        // TODO: If anyone tells me what it's supposed to do I'd be happy to implement
-        _ = cookie;
-    }
 }
 
 pub async fn serve(

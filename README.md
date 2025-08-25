@@ -13,51 +13,47 @@ Feature-rich Wayland idle daemon.
 
 ## Configuration
 
-Moxidle's configuration is written in Lua and is located at `$XDG_CONFIG_HOME/moxidle/config.lua` or `~/.config/moxidle/config.lua`.
+Moxidle's configuration is written in Nix and is located at `$XDG_CONFIG_HOME/mox/moxidle.nix`.
 
 ### Example Configuration
 
-```lua
-return {
+```nix
+{
   general = {
-    -- Command executed when org.freedesktop.login1.Session Lock signal is emitted
-    -- This signal is triggered by commands like 'loginctl lock-sessions'
-    lock_cmd = "pidof hyprlock || hyprlock",
+    # Command executed when org.freedesktop.login1.Session Lock signal is emitted
+    # This signal is triggered by commands like 'loginctl lock-sessions'
+    lock_cmd = "pidof hyprlock || hyprlock";
 
-    -- Command executed when org.freedesktop.login1.Session Unlock signal is emitted  
-    -- This signal is triggered by commands like 'loginctl unlock-sessions'
-    unlock_cmd = "pkill -USR1 hyprlock",
+    # Command executed when org.freedesktop.login1.Session Unlock signal is emitted  
+    # This signal is triggered by commands like 'loginctl unlock-sessions'
+    unlock_cmd = "pkill -USR1 hyprlock";
 
-    before_sleep_cmd = "notify-send 'Going to sleep'", -- Command executed before sleep
-    after_sleep_cmd = "notify-send 'Awake!'", -- Command executed after waking up
-    ignore_dbus_inhibit = false, -- Ignore DBus idle-inhibit requests
-    ignore_systemd_inhibit = false, -- Ignore systemd idle inhibitors
-    ignore_audio_inhibit = false, -- Ignore audio activity inhibition
-  },
-  listeners = {
+    before_sleep_cmd = "notify-send 'Going to sleep'"; # Command executed before sleep
+    after_sleep_cmd = "notify-send 'Awake!'";          # Command executed after waking up
+    ignore_dbus_inhibit = false;                       # Ignore DBus idle-inhibit requests
+    ignore_systemd_inhibit = false;                    # Ignore systemd idle inhibitors
+    ignore_audio_inhibit = false;                      # Ignore audio activity inhibition
+  };
+
+  listeners = [
     {
-      conditions = { "on_battery", { battery_below = 20 } }, -- Conditions needed to be fullfilled for timeout to launch
-      timeout = 300, -- Idle timeout in seconds
-      on_timeout = "systemctl suspend", -- Command executed on timeout
-      on_resume = "notify-send 'Welcome back!'", -- Command executed on user activity
-    },
+      conditions = [ "on_battery" { battery_below = 20; } ]; # Conditions needed to be fulfilled for timeout to launch
+      timeout = 300;                                         # Idle timeout in seconds
+      on_timeout = "systemctl suspend";                      # Command executed on timeout
+      on_resume = "notify-send 'Welcome back!'";             # Command executed on user activity
+    }
     {
-      conditions = { "on_ac" },
-      timeout = 300,
-      on_timeout = "pidof hyprlock || hyprlock",
-      on_resume = "notify-send 'Welcome back!'",
-    },
-  },
+      conditions = [ "on_ac" ];
+      timeout = 300;
+      on_timeout = "pidof hyprlock || hyprlock";
+      on_resume = "notify-send 'Welcome back!'";
+    }
+  ];
 }
 ```
 
-You can define multiple timeout rules. If `on_timeout` or `on_resume` is omitted, those events will be ignored.
-
-Run `man 5 moxidle` for more information
-
 ## Dependencies  
 
-- **Lua** 5.4  
 - **Rust**  
 - **dbus**
 - **wayland**  
@@ -115,7 +111,7 @@ systemd-inhibit \
 ## Command-line Flags
 
 ```
--c <config_path>, --config <config_path>  Specify a custom config path (default: ~/.config/moxidle/config.lua)
+-c <config_path>, --config <config_path>  Specify a custom config path (default: $XDG_CONFIG_HOME/moxidle.nix)
 -q, --quiet                               Suppress output
 -v, --verbose                             Enable verbose logging
 ```

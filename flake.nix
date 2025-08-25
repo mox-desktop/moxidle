@@ -50,7 +50,6 @@
               rust-analyzer-unwrapped
               nixd
               pkg-config
-              lua5_4
               libpulseaudio
               ;
           };
