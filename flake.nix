@@ -31,25 +31,24 @@
     {
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          buildInputs =
-            [
-              (pkgs.rust-bin.stable.latest.default.override {
-                extensions = [
-                  "rust-src"
-                  "rustfmt"
-                ];
-              })
-            ]
-            ++ builtins.attrValues {
-              inherit (pkgs)
-                scdoc
-                rust-analyzer-unwrapped
-                nixd
-                pkg-config
-                lua5_4
-                libpulseaudio
-                ;
-            };
+          buildInputs = [
+            (pkgs.rust-bin.stable.latest.default.override {
+              extensions = [
+                "rust-src"
+                "rustfmt"
+              ];
+            })
+          ]
+          ++ builtins.attrValues {
+            inherit (pkgs)
+              scdoc
+              rust-analyzer-unwrapped
+              nixd
+              pkg-config
+              lua5_4
+              libpulseaudio
+              ;
+          };
 
           shellHook = ''
             export LD_LIBRARY_PATH=${pkgs.libpulseaudio}/lib:$LD_LIBRARY_PATH
