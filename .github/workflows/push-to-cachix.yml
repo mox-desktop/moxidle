@@ -1,0 +1,15 @@
+name: "Push to cachix"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  cachix:
+    uses: mox-desktop/ci-templates/.github/workflows/push-to-cachix.yml@master
+    with:
+      cachix_name: "moxidle"
+    secrets:
+      CACHIX_SIGNING_KEY: ${{ secrets.CACHIX_SIGNING_KEY }}
+      REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
