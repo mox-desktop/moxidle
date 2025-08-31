@@ -28,8 +28,33 @@ impl Config {
         let home_dir = std::env::var("HOME").map(PathBuf::from)?;
         let config_dir = std::env::var("XDG_CONFIG_HOME")
             .map(PathBuf::from)
-            .unwrap_or_else(|_| home_dir.join(".config"));
-        Ok(config_dir.join("mox").join("moxidle.nix"))
+            .unwrap_or_else(|_| home_dir.join(".config"))
+            .join("mox");
+
+        let config_dir_first = config_dir.join("moxidle.nix");
+        if config_dir_first.exists() {
+            log::info!("Configuration found at {}", config_dir_first.display());
+            return Ok(config_dir_first);
+        } else {
+            log::warn!("Configuration not found at {}", config_dir_first.display());
+        }
+
+        let config_dir_second = config_dir.join("moxidle").join("default.nix");
+        if config_dir_second.exists() {
+            log::info!("Configuration found at {}", config_dir_second.display());
+            Ok(config_dir_second)
+        } else {
+            log::error!(
+                "Configuration not found at {} or {}",
+                config_dir_first.display(),
+                config_dir_second.display()
+            );
+            Err(anyhow::anyhow!(
+                "Configuration not found at {} or {}",
+                config_dir_first.display(),
+                config_dir_second.display()
+            ))
+        }
     }
 }
 

@@ -34,30 +34,36 @@
         );
     in
     {
-      devShells = forAllSystems (pkgs: {
-        default = pkgs.mkShell {
-          buildInputs = [
-            (pkgs.rust-bin.stable.latest.default.override {
-              extensions = [
-                "rust-src"
-                "rustfmt"
-              ];
-            })
-          ]
-          ++ builtins.attrValues {
-            inherit (pkgs)
-              scdoc
-              rust-analyzer-unwrapped
-              nixd
-              pkg-config
-              libpulseaudio
-              ;
-          };
 
-          shellHook = ''
-            export LD_LIBRARY_PATH=${pkgs.libpulseaudio}/lib:$LD_LIBRARY_PATH
-          '';
-        };
+      devShells = forAllSystems (pkgs: {
+        default =
+          let
+            inherit (pkgs) lib;
+            buildInputs = [
+              (pkgs.rust-bin.selectLatestNightlyWith (
+                toolchain:
+                toolchain.default.override {
+                  extensions = [
+                    "rust-src"
+                    "rustfmt"
+                  ];
+                }
+              ))
+            ]
+            ++ builtins.attrValues {
+              inherit (pkgs)
+                scdoc
+                rust-analyzer-unwrapped
+                nixd
+                pkg-config
+                libpulseaudio
+                ;
+            };
+          in
+          pkgs.mkShell.override { stdenv = pkgs.clang12Stdenv; } {
+            inherit buildInputs;
+            LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
+          };
       });
 
       formatter = forAllSystems (
@@ -89,14 +95,14 @@
         moxidle = pkgs.callPackage ./nix/package.nix {
           rustPlatform =
             let
-              rust-bin = pkgs.rust-bin.stable.latest.default;
+              rust-bin = (pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default));
             in
             pkgs.makeRustPlatform {
               cargo = rust-bin;
               rustc = rust-bin;
             };
         };
-        default = self.packages.${pkgs.system}.moxidle;
+        default = self.packages.${pkgs.stdenv.hostPlatform.system}.moxidle;
       });
 
       homeManagerModules = {

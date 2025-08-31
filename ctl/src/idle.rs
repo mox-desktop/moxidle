@@ -5,7 +5,6 @@ pub enum Event {
     Uninhibit,
     ToggleInhibit,
     InhibitState,
-    Inhibitors,
 }
 
 #[zbus::proxy(
@@ -19,8 +18,6 @@ trait Idle {
     async fn inhibit(&self) -> zbus::Result<()>;
 
     async fn uninhibit(&self) -> zbus::Result<()>;
-
-    async fn inhibitors(&self) -> zbus::Result<Vec<String>>;
 }
 
 pub async fn emit(event: Event) -> zbus::Result<()> {
@@ -42,12 +39,6 @@ pub async fn emit(event: Event) -> zbus::Result<()> {
                 writeln!(out, "inhibited")?;
             } else {
                 writeln!(out, "uninhibited")?;
-            }
-        }
-        Event::Inhibitors => {
-            let inhibitors = idle.inhibitors().await?;
-            for inhibitor in inhibitors {
-                writeln!(out, "{inhibitor}")?;
             }
         }
         Event::Inhibit => idle.inhibit().await?,

@@ -13,7 +13,7 @@ Feature-rich Wayland idle daemon.
 
 ## Configuration
 
-Moxidle's configuration is written in Nix and is located at `$XDG_CONFIG_HOME/mox/moxidle.nix`.
+Moxidle's configuration is written in Nix and is located at `$XDG_CONFIG_HOME/mox/moxidle.nix` or `$XDG_CONFIG_HOME/mox/moxidle/default.nix`.
 
 ### Example Configuration
 

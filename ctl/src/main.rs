@@ -19,13 +19,6 @@ pub enum IdleCommand {
         #[command(subcommand)]
         action: SwitchAction,
     },
-
-    /// Show all active inhibitors
-    #[command(
-        about = "List active idle inhibitors",
-        long_about = "Displays all currently registered inhibitors that are preventing the session from going idle. Useful for debugging or monitoring idle state suppression."
-    )]
-    Inhibitors,
 }
 
 #[derive(Subcommand)]
@@ -47,7 +40,6 @@ async fn main() -> anyhow::Result<()> {
             SwitchAction::Toggle => idle::Event::ToggleInhibit,
             SwitchAction::State => idle::Event::InhibitState,
         },
-        IdleCommand::Inhibitors => idle::Event::Inhibitors,
     };
 
     idle::emit(event).await.map_err(Into::into)

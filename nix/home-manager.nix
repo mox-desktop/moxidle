@@ -20,7 +20,7 @@ in
 
   config = lib.mkIf cfg.enable {
     xdg.configFile = {
-      "mox/moxidle.nix" = lib.mkIf (cfg.settings != { }) {
+      "mox/moxidle/default.nix" = lib.mkIf (cfg.settings != { }) {
         text = lib.generators.toPretty { } cfg.settings;
       };
     };
@@ -35,7 +35,7 @@ in
         After = [ config.wayland.systemd.target ];
         ConditionEnvironment = "WAYLAND_DISPLAY";
         X-Restart-Triggers = [
-          (lib.mkIf (cfg.settings != { }) config.xdg.configFile."mox/moxidle.nix".source)
+          (lib.mkIf (cfg.settings != { }) config.xdg.configFile."mox/moxidle/default.nix".source)
         ];
       };
       Service = {
