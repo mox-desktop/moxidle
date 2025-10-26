@@ -7,13 +7,13 @@ mod screensaver;
 mod upower;
 mod usb;
 
+use log::LevelFilter;
 use calloop::EventLoop;
 use calloop_wayland_source::WaylandSource;
 use clap::Parser;
 use config::Condition;
 use config::{Config, ListenerConfig, MoxidleConfig};
 use env_logger::Builder;
-use log::LevelFilter;
 use rusb::UsbContext;
 use std::process::{Command, Stdio};
 use std::sync::mpsc;
